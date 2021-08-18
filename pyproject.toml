@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "weather_data"
+version = "0.1.0"
+description = ""
+authors = ["Kovas Palunas <kovas.palunas@gmail.com>"]
+packages = [
+    { include = "weather_data" }
+  ]
+
+[tool.poetry.scripts]
+plotter = "weather_data.plotter:main"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+pandas = "^1.3.2"
+plotly = "^5.2.1"
+click = "^8.0.1"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
