@@ -91,10 +91,26 @@ python-versions = ">=3.6"
 [package.extras]
 doc = ["reno", "sphinx", "tornado (>=4.5)"]
 
+[[package]]
+name = "tqdm"
+version = "4.62.1"
+description = "Fast, Extensible Progress Meter"
+category = "main"
+optional = false
+python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,>=2.7"
+
+[package.dependencies]
+colorama = {version = "*", markers = "platform_system == \"Windows\""}
+
+[package.extras]
+dev = ["py-make (>=0.1.0)", "twine", "wheel"]
+notebook = ["ipywidgets (>=6)"]
+telegram = ["requests"]
+
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "d9b7d38f028487d3a240722f67299b29e8ec95e2ac68f42a1a4d6fcce1c54e92"
+content-hash = "7ffb4a59b2c77cad5afae0aa1c92f133e8b440ff849598453e36035938433050"
 
 [metadata.files]
 click = [
@@ -175,4 +191,8 @@ six = [
 tenacity = [
     {file = "tenacity-8.0.1-py3-none-any.whl", hash = "sha256:f78f4ea81b0fabc06728c11dc2a8c01277bfc5181b321a4770471902e3eb844a"},
     {file = "tenacity-8.0.1.tar.gz", hash = "sha256:43242a20e3e73291a28bcbcacfd6e000b02d3857a9a9fff56b297a27afdc932f"},
+]
+tqdm = [
+    {file = "tqdm-4.62.1-py2.py3-none-any.whl", hash = "sha256:07856e19a1fe4d2d9621b539d3f072fa88c9c1ef1f3b7dd4d4953383134c3164"},
+    {file = "tqdm-4.62.1.tar.gz", hash = "sha256:35540feeaca9ac40c304e916729e6b78045cbbeccd3e941b2868f09306798ac9"},
 ]
