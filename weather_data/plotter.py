@@ -59,7 +59,7 @@ def create_plot(df: pandas.DataFrame, datafile: str):
     # Average Line with label
     overall_mean = agg_df['itrained', 'mean'].mean()
     fig.add_trace(go.Scatter(
-        x=[list(agg_df['time'])[-int(0.06 * len(agg_df['time']))]],
+        x=[list(agg_df['time'])[-int(0.15 * len(agg_df['time']))]],
         y=[overall_mean + 0.05],
         text=[f'<b>{100 * overall_mean:.1f}% chance</b>'],
         mode="text",
@@ -97,7 +97,7 @@ def create_plot(df: pandas.DataFrame, datafile: str):
 
   # style all the traces
   fig.update_traces(
-      hoverinfo='name+x+text',
+      hoverinfo='name+x+text+y',
       showlegend=False)
 
   # Update axes
@@ -106,7 +106,7 @@ def create_plot(df: pandas.DataFrame, datafile: str):
   fig.update_layout(
       title=(
           f'24 Hour Precipitation ({datafile}) <br>'
-          '<sup>Units: 1/100 of an inch (15min windows)</sup>'),
+          '<sup>Units: Percent chance raining (15min windows)</sup>'),
       dragmode='zoom',
       hovermode='closest',
       height=2000,
