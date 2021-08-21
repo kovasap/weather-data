@@ -9,17 +9,17 @@ import plotly.graph_objects as go
 import plotly.express as px
 from tqdm import tqdm
 
+
+# Amount of rain required for the code to consider it to be raining.
+IT_RAINED_CUTOFF = 0.3
+
 METRIC_COLORS = px.colors.cyclical.mrybm * 2
 # METRIC_COLORS = px.colors.sequential.Electric * 2
 
 
 # Based on https://plotly.com/python/range-slider/.
-def create_plot(df: pandas.DataFrame, html_name: str):
-  # Create figure
+def create_plot(df: pandas.DataFrame, datafile: str):
   fig = go.Figure()
-
-  max_x = max(df['QGAG'])
-
   axis_domain_size = 1.0 / 12
   y_axes = {}
   for i in range(12):
@@ -27,7 +27,26 @@ def create_plot(df: pandas.DataFrame, html_name: str):
     agg_df = monthly_df.groupby('time', as_index=False).agg(
         {'itrained': ['mean', 'std']})
     print(agg_df)
+
+    # Setup Y-Axis
     y_str = '' if i == 0 else str(i + 1)
+    y_axes[f'yaxis{y_str}'] = dict(
+        anchor='x',
+        domain=[axis_domain_size * i, axis_domain_size * (i + 1)],
+        linecolor=METRIC_COLORS[i],
+        mirror=True,
+        range=[0.0, 0.5],
+        showline=True,
+        side='right',
+        tickfont={'color': METRIC_COLORS[i]},
+        tickmode='auto',
+        ticks='',
+        title=calendar.month_name[i + 1],
+        titlefont={'color': METRIC_COLORS[i]},
+        type='linear',
+        zeroline=False)
+
+    # Data
     fig.add_trace(go.Scatter(
         name=calendar.month_name[i + 1],
         x=agg_df['time'],
@@ -36,6 +55,8 @@ def create_plot(df: pandas.DataFrame, html_name: str):
         yaxis=f'y{y_str}',
         line=dict(color=METRIC_COLORS[i]),
     ))
+
+    # Average Line with label
     overall_mean = agg_df['itrained', 'mean'].mean()
     fig.add_trace(go.Scatter(
         x=[list(agg_df['time'])[-int(0.06 * len(agg_df['time']))]],
@@ -51,6 +72,8 @@ def create_plot(df: pandas.DataFrame, html_name: str):
         yaxis=f'y{y_str}',
         marker=dict(size=0, color='rgba(0, 0, 0, 0.3)'),
         line_dash='dash'))
+
+    # Error bars.
     error_bar_color = 'rgba(68, 68, 68, 0.2)'
     error_bar_options = dict(
         marker=dict(size=0, color=error_bar_color),
@@ -71,21 +94,6 @@ def create_plot(df: pandas.DataFrame, html_name: str):
         fill='tonexty',
         **error_bar_options
     ))
-    y_axes[f'yaxis{y_str}'] = dict(
-        anchor='x',
-        domain=[axis_domain_size * i, axis_domain_size * (i + 1)],
-        linecolor=METRIC_COLORS[i],
-        mirror=True,
-        range=[0.0, 0.5],
-        showline=True,
-        side='right',
-        tickfont={'color': METRIC_COLORS[i]},
-        tickmode='auto',
-        ticks='',
-        title=calendar.month_name[i + 1],
-        titlefont={'color': METRIC_COLORS[i]},
-        type='linear',
-        zeroline=False)
 
   # style all the traces
   fig.update_traces(
@@ -95,10 +103,9 @@ def create_plot(df: pandas.DataFrame, html_name: str):
   # Update axes
   fig.update_layout(**y_axes)
 
-  # Update layout
   fig.update_layout(
       title=(
-          'Precipitation Over the Day <br>'
+          f'24 Hour Precipitation ({datafile}) <br>'
           '<sup>Units: 1/100 of an inch (15min windows)</sup>'),
       dragmode='zoom',
       hovermode='closest',
@@ -107,7 +114,8 @@ def create_plot(df: pandas.DataFrame, html_name: str):
       margin=dict(t=50, b=50),
   )
 
-  fig.write_html(html_name)
+  fig.write_html(f'{datafile}.html')
+  fig.write_json(f'{datafile}.json')
 
 
 def parse_datetime(s: Union[str, datetime]) -> datetime:
@@ -153,12 +161,13 @@ def main(datafile: str, station: str, start_date: str, end_date: str):
     # df = df[df['STATION_NAME'] == station]
     df['datetime'] = df['DATE'].map(parse_datetime)
   df = df[-df['QGAG'].isin({999.99, -9999.99, -9999.00})]
-  df['itrained'] = df['QGAG'].map(lambda qgag: 1.0 if qgag > 0.0 else 0.0)
+  df['itrained'] = df['QGAG'].map(
+      lambda qgag: 1.0 if qgag >= IT_RAINED_CUTOFF else 0.0)
   df['time'] = df['datetime'].map(lambda dt: dt.time())
   print(df)
   print(set(df['QGAG']))
 
-  create_plot(df, 'out.html')
+  create_plot(df, datafile)
 
 
 if __name__ == '__main__':
